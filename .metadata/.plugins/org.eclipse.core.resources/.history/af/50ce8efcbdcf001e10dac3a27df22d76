@@ -1,0 +1,47 @@
+package com.shaikh.atm.test;
+
+
+import  com.shaikh.atm.entity.Transaction;
+
+import java.util.List;
+import java.util.function.Consumer;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+
+import com.shaikh.atm.entity.Card;
+import com.shaikh.atm.service.CardService;
+import com.shaikh.atm.service.CardServiceImpl;
+
+public class TestApp {
+   
+	public static void main(String[] args) 
+	{
+		EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("atmCenter");
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		CardService cardService=new CardServiceImpl();
+		Card card=cardService.getDataByCardNo("567848621564");
+		
+		String jpql="select t from Transaction t ";
+		Query query=entityManager.createQuery(jpql,Transaction.class);
+		//query.setParameter(1, card.getAccount().getAccountNo());
+		//query.setMaxResults(2);
+		List<Transaction>list=query.getResultList();
+		System.out.println(list);
+		//List<Transaction>miniList=cardService.getMiniStatement(card.getAccount().getAccountNo());
+		
+		//System.out.println(card.getAccount().getAccountNo());
+		//Consumer<Transaction>consumerList=(Transaction transaction)->{System.out.println(transaction.getTransactionId());};
+		//miniList.forEach(consumerList);
+		
+	
+		
+		
+		
+		
+	}
+	
+	
+}

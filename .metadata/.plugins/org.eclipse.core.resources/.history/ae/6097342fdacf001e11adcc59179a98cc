@@ -1,0 +1,127 @@
+package com.shaikh.atm.presentation;
+
+
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
+import java.util.Scanner;
+import java.util.UUID;
+import java.util.function.Consumer;
+
+import com.shaikh.atm.entity.Account;
+import com.shaikh.atm.entity.Card;
+import com.shaikh.atm.entity.Customer;
+import com.shaikh.atm.entity.Transaction;
+import com.shaikh.atm.service.CardService;
+import com.shaikh.atm.service.CardServiceImpl;
+import com.shaikh.atm.validation.MyValidation;
+
+public class AppImpl implements App 
+{
+	private Card card=Login.getLoginObject();
+	private Transaction transaction;
+	private Double balance;
+	private LocalDate date=LocalDate.now();
+	private CardService cardService=new CardServiceImpl();
+	Scanner scanner=new Scanner(System.in);
+	private String transactionId;
+	
+	@Override
+	public void withdrawAmount() 
+	{	
+		System.out.print("\n\tEnter the amount: ");
+		Double amount=scanner.nextDouble();
+		Transaction transaction1=cardService.withdrawlBalance(card, amount);
+		
+		if(transaction1!=null)
+		{
+			
+			System.out.println("\n\tDo you want payment redeipt:[yes/no]");
+			String choice=scanner.next();
+			if(choice.equalsIgnoreCase("yes"))
+			{
+				 Transaction transaction=cardService.getDataByTransactionId(transactionId);
+				 System.out.println("\n\t---------------------------------------Recipt----------------------------------------------------------------");
+				 System.out.println("\n\t Account Holder Name:"+transaction.getAccount().getCustomer().getCustomerName()+"\t\t\tAccount Number:"+transaction.getAccount().getAccountNo());
+			     System.out.println("\n\tTransaction Id:"+transaction.getTransactionId()+"\t\t\tTransaction Date"+transaction.getTransactionDate());
+			     System.out.println("\n\t---------------------------------------------------------------------------------------------------------------");
+			}
+			
+		}
+		else
+		{
+		  System.out.println("\n\tInsufficient balance");	
+		}
+	}
+
+	@Override
+	public void depositeAmount() 
+	{	
+		System.out.print("\n\tEnter the amount: ");
+		Double amount=scanner.nextDouble();	
+		balance=card.getAccount().getBalance()+amount;
+		System.out.print("\n\t"+amount+" "+cardService.updateBalance(card.getCardNo(), balance)+" DEPOSITED\n");
+		transactionId=UUID.randomUUID().toString();
+		cardService.addTransaction(transactionId, amount, date, "Withdraw",card.getAccount());
+		System.out.println("\n\tDo you want payment redeipt:[yes/no]");
+		String choice=scanner.next();
+		if(choice.equalsIgnoreCase("yes"))
+		{
+			 Transaction transaction=cardService.getDataByTransactionId(transactionId);
+			 System.out.println("\n\t---------------------------------------Recipt----------------------------------------------------------------");
+			 System.out.println("\n\t Account Holder Name:"+transaction.getAccount().getCustomer().getCustomerName()+"\t\t\tAccount Number:"+transaction.getAccount().getAccountNo());
+		     System.out.println("\n\tTransaction Id:"+transaction.getTransactionId()+"\t\t\tTransaction Date"+transaction.getTransactionDate());
+		     System.out.println("\n\t---------------------------------------------------------------------------------------------------------------");
+		}
+		
+	}
+
+	@Override
+	public void checkBalance() 
+	{		
+		System.out.println("\n\tBalance is: "+card.getAccount().getBalance());
+		
+	}
+
+	@Override
+	public void changePin() {
+		System.out.println("Enter the Old Pin");
+		String oldPin=scanner.next();
+		if(MyValidation.checkPinNo( oldPin,card.getPinNo()))
+		{
+			System.out.println("Enter the New Pin");
+			String newPin=scanner.next();
+			System.out.println("Enter Confirm Pin");
+			String confirmPin=scanner.next();
+			if(confirmPin.equals(newPin))
+			{
+				System.out.println(cardService.changePinNo(card.getCardNo(),Integer.parseInt(newPin)));
+			}
+			else 
+			{
+				System.out.println("New Pin and Confirm Pin Does Not Match");
+			}
+		}else
+		{
+			System.out.println("Enter Correct Pin Number");
+		}
+		
+	}
+
+	@Override
+	public void getMiniStatement() {
+		
+		List<Transaction>miniList=cardService.getMiniStatement(card.getAccount().getAccountNo());
+		Consumer<Transaction>consumerList=(Transaction transaction)->{
+			System.out.println("\t\n-----------------------------------------------------------------------------------------------------------------------------------");
+			System.out.print("\t\n Account Holder Name:"+transaction.getAccount().getCustomer().getCustomerName()+"\t\t\t"+"Account Number:"+transaction.getAccount().getAccountNo());
+			System.out.println("\t\n"+transaction.getTransactionId());
+			System.out.print("\t\t"+transaction.getTransactionType());
+			System.out.println("\t\n"+transaction.getAmount());
+			System.out.print("\t\t"+transaction.getTransactionDate());
+			System.out.println("\t\n-----------------------------------------------------------------------------------------------------------------------------------");
+			};
+		miniList.forEach(consumerList);
+		
+	}
+}

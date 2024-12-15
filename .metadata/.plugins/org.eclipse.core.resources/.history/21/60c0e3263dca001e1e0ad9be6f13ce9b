@@ -1,0 +1,38 @@
+package com.firstgroup.atm.validation;
+
+import com.firstgroup.atm.entity.Card;
+import com.firstgroup.atm.presentation.Login;
+import com.firstgroup.atm.service.CardService;
+import com.firstgroup.atm.service.CardServiceImpl;
+
+public class MyValidation {
+	
+
+
+	
+	public static Boolean checkCardNo(String cardNo)
+	{
+		
+		if(cardNo.length()==12)
+		
+			return true;
+		
+		else 
+			return false;
+		
+		
+	}
+	public static Boolean checkPinNo(Integer pinNo,Integer pin)
+	{   
+		
+		if(pinNo.equals(pin))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+}
